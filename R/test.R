@@ -8,6 +8,7 @@ list.files("Data/")
 milk <- read.csv("Data/Milk.csv")
 milk <- milk[,2:3]
 shapiro.test(milk)
+SW_test(milk)
 
 plot(lm(Cost ~ Volume, data=milk))
 
@@ -31,22 +32,38 @@ SW_test <- function(data, plot_qq = FALSE) {
   if (any(is.infinite(data))) {
     stop("Input data contains infinite values.")
   }
-  
+}
+
+data <- cbind(rnorm(100),rnorm(100),rnorm(100))
+
+  #Obtain sorted data, x_{(i)}
   n <- length(data)
   sorted_data <- sort(data)
   
-  # Compute expected values of order statistics for a normal distribution
-  m <- qnorm((1:n - 3/8) / (n + 1/4))
+  # compute expected values for a normal dist
+  m <- qnorm((1:n - .375) / (n + .25))
   
-  # Normalize the expected values
-  m <- m / sqrt(sum(m^2))
+  V <- matrix(0, n, n)
+  for (i in 1:n) {
+    for (j in 1:n) {
+      V[i, j] <- min(i, j) / n - (i * j) / n^2
+    }
+  }
   
-  # Compute the weights
-  c <- sum((m - mean(m))^2)
-  weights <- (m - mean(m)) / sqrt(c)
+  # Compute inverse of V
+  V_inv <- MASS::ginv(V)
   
+  # Compute C
+  C <- sqrt(t(m) %*% V_inv %*% V_inv %*% m)
+  
+  # Compute weights a
+  a <- (t(m) %*% V_inv) / C
+  
+  # Compute the mean of the data
+  x_bar <- mean(data)
+
   # Compute the Shapiro-Wilk test statistic W
-  W <- (sum(weights * sorted_data)^2) / sum((sorted_data - mean(sorted_data))^2)
+  W <- (sum(a * sorted_data)^2) / sum((sorted_data - mean(sorted_data))^2)
   
   # Plot QQ-plot if required
   if (plot_qq) {
