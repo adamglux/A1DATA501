@@ -86,6 +86,7 @@ SW_test <- function(data, plot_qq = FALSE) {
   # compute expected values for a normal dist
   m <- qnorm((1:n - .375) / (n + .25))
   
+  # compute a covariance matrix
   V <- matrix(0, n, n)
   for (i in 1:n) {
     for (j in 1:n) {
@@ -201,7 +202,17 @@ SW_test(milk$Cost) #sample size of 12
 #W from a non-normal distribution 
 SW_test(data7)
 #result is much smaller
+
+#numbers shared with classmates
+nums <- c(7.0, 8.0, 7.5, 7.2, 7.8)
+SW_test(nums)
+
+## adding numbers to set
+nums <- c(nums,runif(10, 7,8))
+SW_test(nums)
 ```
+
+A sample of 100 random normal has a W of 0.1052131. Datasets with smaller numbers, for example `milk` (n=12), and `nums` (n=5) have larger values for W. Adding more samples to `nums` brings down the value of W. It appears that low values of n are unstable. 
 
 
 
@@ -249,6 +260,7 @@ The function `SW_test()` derived from Wikipedia and online sources output a test
 
 8 tests are run on the function, using two methods: code available in this document above, as well as a test file. Both use the same code. 4 Tests check error, and 4 tests check that the output is desired. All tests are passing, indicating that the correct errors are displayed, and the output is congruent with the functionality of the function.  
 
+**Note:** Assignment 1 project files are available at this [link](https://github.com/adamglux/A1DATA501.git).
 
 
 _____
