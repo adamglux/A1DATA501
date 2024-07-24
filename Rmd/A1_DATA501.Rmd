@@ -22,6 +22,7 @@ library(knitr)
 library(pander)
 library(dplyr)
 library(MASS)
+library(testthat)
 ```
 
 <!-- Settings and Options -->
@@ -29,38 +30,38 @@ library(MASS)
 <!--  - -->
 <!--  -  -->
 
-
 ```{r pander_options, echo=FALSE}
 #pander options
 panderOptions('missing', '')
 panderOptions('table.split.table', Inf)
 ```
 
-```{r misc, echo = FALSE}
-
-# plot sizes 
-# chunk setup: 
-#{r echo = FALSE, fig.height = 4, fig.width = 5, fig.align='center'}
-# 6.5x4.5 is used by default
-
-# Pander settings 
-
-# Additional settings
-#update: set WD to 
-# devtools::install("../skeleton")
-# https://bookdown.org/yihui/rmarkdown/pdf-document.html
-```
-
 # Project Files
 
-[link](https://github.com/adamglux/A1DATA501.git)
+Assignment 1 project files are available at this [link](https://github.com/adamglux/A1DATA501.git).
 
 # Shapiro-Wilk Test Statistic 
 
 ## Function 
 
-```{r}
-SW_test <- function(data, plot_qq = FALSE) {
+This function follows the method:
+
+$$W = \frac{(\sum^n_{i=1}a_ix_{(i)})^2}{\sum^n_{i=1}(x_i - \bar x)^2}$$
+
+where $x_{(i)}$ is an ordered statistic, $\bar x$ is the sample mean, and $a_i$ is given by: 
+
+$$(a_1,...,a_n) = \frac{m^TV^{-1}}{C}$$
+$$C = (m^TV^{-1}V^{-1}m)^{1/2}$$
+
+source: [Wikipedia](https://en.wikipedia.org/wiki/Shapiro-Wilk_test)
+other sources include: 
+
+[link] (https://real-statistics.com/tests-normality-and-symmetry/statistical-tests-normality-symmetry/shapiro-wilk-expanded-test/) Shapiro-Wilk Expanded Test, Charles Zaiontz 2014
+
+### SW_test Function
+
+```{r function, echo=FALSE}
+SW_test <- function(data, plot_qq = FALSE) { 
   # Input validation
   if (!is.numeric(data)) {
     stop("Input data must be numeric.")
@@ -91,7 +92,7 @@ SW_test <- function(data, plot_qq = FALSE) {
       V[i, j] <- min(i, j) / n - (i * j) / n^2
     }
   }
-  
+
   # Compute inverse of V
   V_inv <- MASS::ginv(V)
   
@@ -115,40 +116,132 @@ SW_test <- function(data, plot_qq = FALSE) {
     qqline(data, col = "blue", lwd = 2)
   }
   
-  # Return W statistic
-  return(W)
+  # Return W statistic, and QQ plot
+ #return(list("Shapiro-Wilk W-statistic:" = W))
+  return(list("W" = W))
+  
 }
 ```
 
 
 ## Test Data
 
-```{r}
-# Test 1: Valid numeric data
-data1 <- cbind(rnorm(100),rnorm(100),rnorm(100)) 
-cat("Test 1 - W statistic:", SW_test(data1), "\n")
-length(data1)
+### Create Test File
 
-# Test 2: Valid numeric data with QQ-plot
-data2 <- runif(100)
-cat("Test 2 - W statistic with QQ-plot:", SW_test(data2, plot_qq = TRUE), "\n")
-
-# Test 3: Invalid data (NA values)
-data3 <- c(rnorm(50), NA)
-cat("Test 3 - W statistic with NA values:", SW_test(data3), "\n") # Uncomment to see error
-
-# Test 4: Invalid data (infinite values)
-data4 <- c(rnorm(50), Inf)
-# cat("Test 4 - W statistic with infinite values:", shapiro_wilk_manual(data4), "\n") # Uncomment to see error
-
-# Test 5: Invalid data (non-numeric)
-data5 <- c("a", "b", "c")
-# cat("Test 5 - W statistic with non-numeric data:", shapiro_wilk_manual(data5), "\n") # Uncomment to see error
-
-# Test 6: Invalid data (too few values)
-data6 <- c(1, 2)
-# cat("Test 6 - W statistic with too few values:", shapiro_wilk_manual(data6), "\n") # Uncomment to see error
+```{r echo=FALSE}
+usethis::use_testthat()
 ```
+
+### Testing in RMarkdown
+
+```{r datasets}
+
+### datasets
+
+## generated data
+data1 <- rnorm(300) 
+data3 <- c(rnorm(50), NA)
+data4 <- c(rnorm(50), Inf)
+data5 <- c("a", "b", "c")
+data6 <- c(1, 2)
+
+## imported data
+milk <- read.csv("Data/Milk.csv") #available on assignment repo
+
+```
+
+
+```{r tests}
+context("Testing SW_test context")
+
+## invalid inputs 
+test_that("function SW_test gives helpful errors", 
+          {
+            expect_error(SW_test(data3), "Input data contains NA values.")
+            
+            expect_error(SW_test(data4), "Input data contains infinite values.")
+            
+            expect_error(SW_test(data5), "Input data must be numeric.")
+            
+            expect_error(SW_test(data6), "Input data must have at least 3 values.")
+            
+            })
+
+## valid inputs
+test_that("function SW_test works with numeric dataframes", {
+  
+  expect_silent(SW_test(data1))
+  
+  expect_silent(SW_test(milk$Cost))
+  
+  expect_type(SW_test(data1), "list")
+  
+  expect_true(typeof(SW_test(data1)[[1]])=="double", TRUE)
+})
+
+```
+
+### Testing using R file
+
+**note**: the "R/test.R" file is a duplicate of the code above
+
+```{r}
+test_file("R/test.R")
+```
+
+
+# Sample Output 
+
+```{r}
+#basic output
+SW_test(data1)
+
+SW_test(milk$Cost)
+```
+
+```{r output1, fig.height = 4, fig.width = 5, fig.align='center'}
+SW_test(data2, plot_qq = T)
+```
+
+
+## As *n* samples increases
+
+```{r output2, fig.height = 4, fig.width = 5, fig.align='center'}
+
+
+#what happens to W as the size of the data increases? 
+ w <- rep(NA,100)
+for (i in 1:100) {
+  data <- rnorm(10*i)
+  dub <- SW_test(data)[[1]]
+  w[i] <- dub[[1]]
+}
+
+plot(w, type="n")
+lines(w)
+```
+
+As n increases, we get a smaller and smaller value for w. 
+
+## compare QQ plots with increasing values of n
+
+```{r output3, fig.height = 4, fig.width = 5, fig.align='center'}
+
+par(mfrow = c(2,3))
+SW_test(rnorm(10), plot_qq = T)
+SW_test(rnorm(25), plot_qq = T)
+SW_test(rnorm(50), plot_qq = T)
+SW_test(rnorm(100), plot_qq = T)
+SW_test(rnorm(200), plot_qq = T)
+SW_test(rnorm(500), plot_qq = T)
+```
+As n samples of random normal increase, the quantities converge onto the QQ line. 
+
+# Final Thoughts
+
+The function `SW_test()` derived from Wikipedia and online sources output a test statistic, W, as well as a QQ-plot — when default parameter `FALSE` is changed to `TRUE`. These test statistics are sensitive to the number of samples. 
+
+8 tests are run on the function, using two methods: code available in this document above, as well as a test file. Both use the same code. 4 Tests check error, and 4 tests check that the output is desired. All tests are passing, indicating that the correct errors are displayed, and the output is congruent with the functionality of the function.  
 
 
 
@@ -162,7 +255,8 @@ End of Assignment 1, DATA501
 
 _____
 
-# Reference
+## References
 
-Source: [link] (https://real-statistics.com/tests-normality-and-symmetry/statistical-tests-normality-symmetry/shapiro-wilk-expanded-test/) Shapiro-Wilk Expanded Test, Charles Zaiontz 2014
+- [link] (https://real-statistics.com/tests-normality-and-symmetry/statistical-tests-normality-symmetry/shapiro-wilk-expanded-test/) Shapiro-Wilk Expanded Test, Charles Zaiontz 2014
+- [Wikipedia](https://en.wikipedia.org/wiki/Shapiro-Wilk_test)
 
