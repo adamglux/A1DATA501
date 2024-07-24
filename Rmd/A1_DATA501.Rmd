@@ -144,6 +144,7 @@ data3 <- c(rnorm(50), NA)
 data4 <- c(rnorm(50), Inf)
 data5 <- c("a", "b", "c")
 data6 <- c(1, 2)
+data7 <- rbinom(300, 1000, prob = 0.7)
 
 ## imported data
 milk <- read.csv("Data/Milk.csv") #available on assignment repo
@@ -194,10 +195,15 @@ test_file("R/test.R")
 
 ```{r}
 #basic output
-SW_test(data1)
+SW_test(rnorm(100)) #sample size of 100 
+SW_test(milk$Cost) #sample size of 12
 
-SW_test(milk$Cost)
+#W from a non-normal distribution 
+SW_test(data7)
+#result is much smaller
 ```
+
+
 
 ```{r output1, fig.height = 4, fig.width = 5, fig.align='center'}
 SW_test(data2, plot_qq = T)
@@ -210,8 +216,8 @@ SW_test(data2, plot_qq = T)
 
 
 #what happens to W as the size of the data increases? 
- w <- rep(NA,100)
-for (i in 1:100) {
+ w <- rep(NA,50)
+for (i in 1:50) {
   data <- rnorm(10*i)
   dub <- SW_test(data)[[1]]
   w[i] <- dub[[1]]
@@ -221,7 +227,7 @@ plot(w, type="n")
 lines(w)
 ```
 
-As n increases, we get a smaller and smaller value for w. 
+As n increases, we get a smaller value for w, converging aroung 0.03. 
 
 ## compare QQ plots with increasing values of n
 
@@ -239,7 +245,7 @@ As n samples of random normal increase, the quantities converge onto the QQ line
 
 # Final Thoughts
 
-The function `SW_test()` derived from Wikipedia and online sources output a test statistic, W, as well as a QQ-plot — when default parameter `FALSE` is changed to `TRUE`. These test statistics are sensitive to the number of samples. 
+The function `SW_test()` derived from Wikipedia and online sources output a test statistic, W, as well as a QQ-plot — when default parameter `FALSE` is changed to `TRUE`. These test statistics are sensitive to the number of samples. Here we see that samples derived from a random normal distribution have higher values than those derived from a binomial distribution.  
 
 8 tests are run on the function, using two methods: code available in this document above, as well as a test file. Both use the same code. 4 Tests check error, and 4 tests check that the output is desired. All tests are passing, indicating that the correct errors are displayed, and the output is congruent with the functionality of the function.  
 
