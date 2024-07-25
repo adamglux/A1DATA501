@@ -19,8 +19,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r packages,results='hide', collapse=TRUE, message=FALSE}
 library(knitr)
-library(pander)
-library(dplyr)
 library(MASS)
 library(testthat)
 ```
@@ -30,15 +28,11 @@ library(testthat)
 <!--  - -->
 <!--  -  -->
 
-```{r pander_options, echo=FALSE}
-#pander options
-panderOptions('missing', '')
-panderOptions('table.split.table', Inf)
-```
-
 # Project Files
 
 Assignment 1 project files are available at this [link](https://github.com/adamglux/A1DATA501.git).
+
+Commit files are available at this [link](https://github.com/adamglux/A1DATA501/commits/master/)
 
 # Shapiro-Wilk Test Statistic 
 
@@ -53,10 +47,15 @@ where $x_{(i)}$ is an ordered statistic, $\bar x$ is the sample mean, and $a_i$ 
 $$(a_1,...,a_n) = \frac{m^TV^{-1}}{C}$$
 $$C = (m^TV^{-1}V^{-1}m)^{1/2}$$
 
-source: [Wikipedia](https://en.wikipedia.org/wiki/Shapiro-Wilk_test)
+sources: 
+
+[Wikipedia](https://en.wikipedia.org/wiki/Shapiro-Wilk_test)
 other sources include: 
 
-[link] (https://real-statistics.com/tests-normality-and-symmetry/statistical-tests-normality-symmetry/shapiro-wilk-expanded-test/) Shapiro-Wilk Expanded Test, Charles Zaiontz 2014
+[Shapiro-Wilk Expanded Test](https://real-statistics.com/tests-normality-and-symmetry/statistical-tests-normality-symmetry/shapiro-wilk-expanded-test/), Charles Zaiontz 2014
+
+[An Extension of Shapiro and Wilk's W Test for
+Normality to Large Samples](https://www.jstor.org/stable/2347973?origin=crossref&seq=2), J.P. Royston
 
 ### SW_test Function
 
@@ -98,12 +97,13 @@ SW_test <- function(data, plot_qq = FALSE) {
   V_inv <- MASS::ginv(V)
   
   # Compute C
-  C <- sqrt(t(m) %*% V_inv %*% V_inv %*% m)
+  #C <- sqrt(t(m) %*% V_inv %*% V_inv %*% m)
   
   # Compute weights a
-  a <- V_inv %*% m
+  a <- t(m) %*% V_inv #V_inv %*% m
   C <- sqrt(sum(a^2))
   a <- a / C
+
   
   # Compute the mean of the data
   x_bar <- mean(data)
@@ -123,7 +123,6 @@ SW_test <- function(data, plot_qq = FALSE) {
   
 }
 ```
-
 
 ## Test Data
 
@@ -203,12 +202,8 @@ SW_test(milk$Cost) #sample size of 12
 SW_test(data7)
 #result is much smaller
 
-#numbers shared with classmates
-nums <- c(7.0, 8.0, 7.5, 7.2, 7.8)
-SW_test(nums)
-
 ## adding numbers to set
-nums <- c(nums,runif(10, 7,8))
+nums <- c(milk$Cost,runif(10, 2,6))
 SW_test(nums)
 ```
 
@@ -275,6 +270,10 @@ _____
 
 ## References
 
-- [link] (https://real-statistics.com/tests-normality-and-symmetry/statistical-tests-normality-symmetry/shapiro-wilk-expanded-test/) Shapiro-Wilk Expanded Test, Charles Zaiontz 2014
-- [Wikipedia](https://en.wikipedia.org/wiki/Shapiro-Wilk_test)
+[Wikipedia](https://en.wikipedia.org/wiki/Shapiro-Wilk_test)
+other sources include: 
 
+[Shapiro-Wilk Expanded Test](https://real-statistics.com/tests-normality-and-symmetry/statistical-tests-normality-symmetry/shapiro-wilk-expanded-test/), Charles Zaiontz 2014
+
+[An Extension of Shapiro and Wilk's W Test for
+Normality to Large Samples](https://www.jstor.org/stable/2347973?origin=crossref&seq=2), J.P. Royston
