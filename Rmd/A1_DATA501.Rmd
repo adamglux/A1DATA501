@@ -124,7 +124,7 @@ SW_test <- function(data, plot_qq = FALSE) {
 }
 ```
 
-## Test Data
+# Test Data
 
 ### Create Test File
 
@@ -216,7 +216,7 @@ SW_test(data2, plot_qq = T)
 ```
 
 
-## As *n* samples increases
+## Increasing n-samples
 
 ```{r output2, fig.height = 4, fig.width = 5, fig.align='center'}
 
