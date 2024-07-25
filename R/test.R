@@ -14,11 +14,13 @@ test_that("function SW_test gives helpful errors",
           })
 
 ## valid inputs
-
 test_that("function SW_test works with numeric dataframes", {
   
   expect_silent(SW_test(data1))
   
   expect_silent(SW_test(milk$Cost))
   
+  expect_type(SW_test(data1), "list")
+  
+  expect_true(typeof(SW_test(data1)[[1]])=="double", TRUE)
 })
