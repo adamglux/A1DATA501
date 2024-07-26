@@ -59,7 +59,7 @@ Normality to Large Samples](https://www.jstor.org/stable/2347973?origin=crossref
 
 ### SW_test Function
 
-```{r function, echo=FALSE}
+```{r function}
 SW_test <- function(data, plot_qq = FALSE) { 
   # Input validation
   if (!is.numeric(data)) {
@@ -124,11 +124,12 @@ SW_test <- function(data, plot_qq = FALSE) {
 }
 ```
 
+
 # Test Data
 
 ### Create Test File
 
-```{r echo=FALSE}
+```{r message=FALSE}
 usethis::use_testthat()
 ```
 
@@ -140,6 +141,7 @@ usethis::use_testthat()
 
 ## generated data
 data1 <- rnorm(300) 
+data2 <- rnorm(1000)
 data3 <- c(rnorm(50), NA)
 data4 <- c(rnorm(50), Inf)
 data5 <- c("a", "b", "c")
